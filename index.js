@@ -21,3 +21,73 @@ const allWagesFor = function () {
     return payable
 }
 
+// 1. Create a single employee record
+function createEmployeeRecord([firstName, familyName, title, payPerHour]) {
+  return {
+    firstName,
+    familyName,
+    title,
+    payPerHour,
+    timeInEvents: [],
+    timeOutEvents: [],
+  };
+}
+
+// 2. Create multiple employee records
+function createEmployeeRecords(arrOfArrs) {
+  return arrOfArrs.map(createEmployeeRecord);
+}
+
+// 3. Add a TimeIn event to `this`
+function createTimeInEvent(dateTime) {
+  const [date, hour] = dateTime.split(" ");
+  this.timeInEvents.push({
+    type: "TimeIn",
+    hour: parseInt(hour),
+    date,
+  });
+  return this;
+}
+
+// 4. Add a TimeOut event to `this`
+function createTimeOutEvent(dateTime) {
+  const [date, hour] = dateTime.split(" ");
+  this.timeOutEvents.push({
+    type: "TimeOut",
+    hour: parseInt(hour),
+    date,
+  });
+  return this;
+}
+
+// 5. Calculate hours worked on a specific date
+function hoursWorkedOnDate(date) {
+  const timeIn = this.timeInEvents.find(e => e.date === date);
+  const timeOut = this.timeOutEvents.find(e => e.date === date);
+  return (timeOut.hour - timeIn.hour) / 100;
+}
+
+// 6. Calculate wages earned on a specific date
+function wagesEarnedOnDate(date) {
+  return hoursWorkedOnDate.call(this, date) * this.payPerHour;
+}
+
+// 7. allWagesFor — PROVIDED in the lab
+function allWagesFor() {
+  const dates = this.timeInEvents.map(e => e.date);
+  return dates.reduce((total, date) => {
+    return total + wagesEarnedOnDate.call(this, date);
+  }, 0);
+}
+
+// 8. Find employee by first name
+function findEmployeeByFirstName(srcArray, firstName) {
+  return srcArray.find(record => record.firstName === firstName);
+}
+
+// 9. Calculate payroll for all employees
+function calculatePayroll(records) {
+  return records.reduce((total, emp) => {
+    return total + allWagesFor.call(emp);
+  }, 0);
+}
